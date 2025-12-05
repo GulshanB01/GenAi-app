@@ -11,6 +11,9 @@ from PIL import Image
 import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
+import sys
+RUNNING_IN_CLOUD = "streamlit" in sys.modules
+
 import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
@@ -153,6 +156,9 @@ def extract_text_from_pdf(file: BytesIO) -> str:
     return "\n".join(texts)
 
 def extract_text_from_image(file: BytesIO) -> str:
+    if RUNNING_IN_CLOUD:
+        st.warning("Image OCR is disabled on the cloud. Please upload PDFs or text files.")
+        return ""
     try:
         image = Image.open(file).convert("RGB")
         text = pytesseract.image_to_string(image)

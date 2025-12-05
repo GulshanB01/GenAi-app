@@ -12,17 +12,8 @@ from PIL import Image
 import sys
 RUNNING_IN_CLOUD = "streamlit" in sys.modules
 
-from paddleocr import PaddleOCR
-
-@st.cache_resource
-def get_ocr():
-    try:
-        return PaddleOCR(lang='en')
-    except Exception as e:
-        st.warning(f"OCR engine could not be initialized: {e}")
-        return None
-
-ocr = get_ocr()
+import easyocr
+reader = easyocr.Reader(['en'], gpu=False)
 
 
 import torch
@@ -167,21 +158,12 @@ def extract_text_from_pdf(file: BytesIO) -> str:
 
 
 def extract_text_from_image(file: BytesIO) -> str:
-    if ocr is None:
-        st.warning("Image OCR is not available on this deployment. PDFs and text files will still work.")
-        return ""
-
     try:
         image = Image.open(file).convert("RGB")
         img_array = np.array(image)
 
-        result = ocr.ocr(img_array, cls=True)
-        lines = []
-        for line in result:
-            for box in line:
-                lines.append(box[1][0])
-
-        return "\n".join(lines)
+        result = reader.readtext(img_array, detail=0)
+        return "\n".join(result)
 
     except Exception as e:
         st.warning(f"OCR failed: {e}")

@@ -6,5 +6,5 @@ PyPDF2
 Pillow
 pytesseract
 numpy
-easyocr
+easyocr==1.7.2
 opencv-python-headless

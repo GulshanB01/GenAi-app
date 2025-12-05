@@ -158,15 +158,24 @@ def extract_text_from_pdf(file: BytesIO) -> str:
 
 
 def extract_text_from_image(file: BytesIO) -> str:
+    """Extract text from an uploaded image using EasyOCR."""
     try:
+        # Load image
         image = Image.open(file).convert("RGB")
         img_array = np.array(image)
 
+        # OCR reading
         result = reader.readtext(img_array, detail=0)
+
+        # If OCR detects nothing
+        if not result:
+            return "No readable text found in the image."
+
+        # Join detected lines
         return "\n".join(result)
 
     except Exception as e:
-        st.warning(f"OCR failed: {e}")
+        st.warning(f"OCR failed while processing image: {e}")
         return ""
 
 

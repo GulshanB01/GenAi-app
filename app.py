@@ -5,7 +5,6 @@ from pathlib import Path
 from io import BytesIO
 
 import easyocr
-
 reader = easyocr.Reader(['en'], gpu=False)
 
 import numpy as np
@@ -158,13 +157,10 @@ def extract_text_from_pdf(file: BytesIO) -> str:
         texts.append(page.extract_text() or "")
     return "\n".join(texts)
 
-def extract_text_from_image(file):
-    import numpy as np
-    from PIL import Image
-    img = Image.open(file).convert("RGB")
-    img_np = np.array(img)
-
-    result = reader.readtext(img_np, detail=0)
+def extract_text_from_image(image):
+    # image is a PIL Image
+    img_array = np.array(image)
+    result = reader.readtext(img_array, detail=0)
     return "\n".join(result)
 
 def extract_text_from_file(uploaded_file) -> str:
@@ -190,7 +186,7 @@ def extract_text_from_file(uploaded_file) -> str:
         st.warning("Unsupported file type. Use PDF/TXT/MD/PNG/JPG.")
         return ""
 
-def simple_chunk_text(text: str, max_chars: int = 500) -> list:
+def simple_chunk_text(text: str, max_chars: int = 1000) -> list:
     text = text.replace("\r", " ")
     paragraphs = [p.strip() for p in text.split("\n") if p.strip()]
     chunks = []
@@ -287,7 +283,7 @@ if uploaded_files:
         text = extract_text_from_file(f)
         if not text.strip():
             continue
-        chunks = simple_chunk_text(text, max_chars=500)
+        chunks = simple_chunk_text(text, max_chars=1000)
         st.session_state.docs.extend(chunks)
 
     build_bm25_index()

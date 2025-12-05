@@ -1,9 +1,10 @@
 streamlit
-transformers
-torch
-rank-bm25
-PyPDF2
-Pillow
-pytesseract
 numpy
+pillow
+PyPDF2
+rank-bm25
+torch
+transformers
+easyocr
 opencv-python-headless
+scikit-image

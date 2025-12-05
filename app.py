@@ -151,17 +151,24 @@ login_signup_widget()
 # ---------------- FILE HANDLING ----------------
 
 def extract_text_from_pdf(file: BytesIO) -> str:
-    reader = PdfReader(file)
+    pdf_reader = PdfReader(file)
     texts = []
-    for page in reader.pages:
+    for page in pdf_reader.pages:
         texts.append(page.extract_text() or "")
     return "\n".join(texts)
 
-def extract_text_from_image(image):
-    # image is a PIL Image
-    img_array = np.array(image)
-    result = reader.readtext(img_array, detail=0)
-    return "\n".join(result)
+
+def extract_text_from_image(file: BytesIO) -> str:
+    """Extract text from an image file using EasyOCR."""
+    try:
+        image = Image.open(file).convert("RGB")
+        img_array = np.array(image)
+        result = reader.readtext(img_array, detail=0)  # list of strings
+        return "\n".join(result)
+    except Exception as e:
+        st.warning(f"OCR failed: {e}")
+        return ""
+
 
 def extract_text_from_file(uploaded_file) -> str:
     if uploaded_file is None:

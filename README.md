@@ -1,184 +1,198 @@
+#  Smart Notes AI Assistant
 
-# Smart Notes AI Assistant
+Smart Notes AI Assistant is an intelligent document-based Q&A system that allows users to upload their notes (PDF or text files) and ask questions directly from them.
+The system performs text extraction, chunking, semantic retrieval, and answer generation using a T5 model.
 
-A web application that allows users to upload their notes (PDF, text files, or images) and ask questions directly from those documents. The system performs text extraction, document chunking, semantic retrieval, and answer generation using a fine-tuned T5 model.
-
-The project is fully deployed on Streamlit Cloud and supports user authentication, credit-based usage, OCR extraction, and feedback logging.
+The web app is deployed on **Streamlit Cloud**, with support for authentication, credit usage, and feedback logging for future model fine-tuning.
 
 ---
-# Live Demo (Hosted on Streamlit Cloud)
 
-Access the app here:
-https://smart-notes-ai.streamlit.app/
+##  Live Demo
 
-## Features
+🔗 **Try the app here:**
+[https://smart-notes-ai.streamlit.app/](https://smart-notes-ai.streamlit.app/)
 
-### 1. Document Upload
+---
+
+##  Features
+
+###  1. Document Upload
 
 Supports the following formats:
 
-* PDF
-* TXT
-* MD
-* PNG, JPG, JPEG
+* **PDF**
+* **TXT**
+* **MD**
 
-### 2. OCR Support
+( *Image OCR removed from this version to improve stability on Streamlit Cloud.*)
 
-Images with text are processed using EasyOCR for text extraction.
+---
 
-### 3. Chunking + Retrieval
+###  2. Intelligent Text Chunking & Retrieval
 
-* Extracted text is split into fixed-size chunks.
-* BM25Okapi is used to retrieve the most relevant chunks for each query.
+* The system breaks long documents into smaller chunks.
+* Uses **BM25Okapi** to retrieve the most relevant chunks from notes.
+* Ensures highly accurate question answering.
 
-### 4. T5 Question Answering
+---
 
-* Uses a fine-tuned T5 model for generating answers.
-* The model uses only the retrieved context from the user’s documents.
+###  3. T5 Question Answering
 
-### 5. User Authentication
+* Uses a **fine-tuned or base T5 model** for generating answers.
+* Model answers **only from the retrieved user notes**.
+* If the answer is not found, the system explicitly says so.
 
-* Login and signup functionality.
-* Each user has their own stored credits.
-* Credits decrease with each answered query.
+---
 
-### 6. Credit System
+###  4. User Authentication
 
-* Credits are stored per user in `data/users.json`.
-* Users can manually add credits from the UI (payment integration not included).
+* Login & Signup system
+* Every user has dedicated storage & credits
+* Passwords stored in JSON database
 
-### 7. Feedback Logging
+---
 
-All user feedback is written to:
+###  5. Credit System
+
+* Each user starts with default credits
+* 1 credit = 1 question answered
+* Manual credit addition UI included
+
+---
+
+###  6. Feedback Logging
+
+All feedback is stored in:
 
 ```
 data/user_feedback.jsonl
 ```
 
-This file can be used later to fine-tune the T5 model.
+This can later be used to fine-tune the T5 model for better accuracy.
 
 ---
 
-## Application Workflow
+##  Application Workflow
 
-1. User logs in or signs up.
-2. User uploads documents (PDF/text/image).
-3. System extracts text and creates chunks.
-4. BM25 ranks relevant chunks based on query.
-5. Top-k chunks are passed to the T5 model.
-6. Model generates an answer.
-7. One credit is deducted per query.
-8. User submits feedback (optional).
+1. User logs in / signs up
+2. Uploads documents (PDF/TXT/MD)
+3. Text is extracted & chunked
+4. BM25 retrieves relevant chunks
+5. Chunks + question → sent to T5 model
+6. Answer generated
+7. Credit deducted
+8. User can submit feedback
 
 ---
 
-## Project Structure
+##  Project Structure
 
 ```
 ├── app.py                     # Main Streamlit application
-├── finetune_t5.py             # Script for T5 fine-tuning
+├── finetune_t5.py             # Script for optional T5 fine-tuning
 ├── requirements.txt           # Python dependencies
 ├── data/
-│   ├── users.json             # User database (credentials + credits)
-│   ├── user_feedback.jsonl    # Collected feedback for training
-│   └── uploaded/              # Uploaded files by users
+│   ├── users.json             # User database
+│   ├── user_feedback.jsonl    # Feedback logs
+│   └── uploaded/              # User-uploaded files
 ├── models/
-│   └── finetuned_t5           # (Optional) Local fine-tuned model
+│   └── finetuned_t5/          # Optional fine-tuned model
 ```
 
 ---
 
-## Technologies Used
+##  Technologies Used
 
-### Backend / Model
+###  Backend / ML
 
 * Python
 * HuggingFace Transformers
-* T5 (fine-tuned for question answering)
+* T5 (base or fine-tuned)
 * PyTorch
 
-### Document Processing
+###  Document Processing
 
 * PyPDF2
-* EasyOCR
+* BM25 (rank_bm25)
 * PIL
-* BM25 (rank_bm25 library)
 
-### Frontend
+###  Frontend
 
 * Streamlit
-* Custom sidebar for authentication and credit management
+* Custom authentication & credit system
 
 ---
 
-## Installation (Local Setup)
+##  Local Installation
 
-### 1. Clone the repository
+### 1️ Clone the repository
 
-```
+```bash
 git clone https://github.com/<your-username>/<repo-name>
 cd <repo-name>
 ```
 
-### 2. Create a virtual environment
+### 2️ Create & activate virtual environment
 
-```
+```bash
 python -m venv .venv
-source .venv/bin/activate         # Mac/Linux
-.venv\Scripts\activate            # Windows
+source .venv/bin/activate     # Mac/Linux
+.venv\Scripts\activate        # Windows
 ```
 
-### 3. Install dependencies
+### 3️ Install dependencies
 
-```
+```bash
 pip install -r requirements.txt
 ```
 
-### 4. (Optional) Setup EasyOCR GPU (CPU works by default)
+### 4️ Run the app
 
-### 5. Run the application
-
-```
+```bash
 streamlit run app.py
 ```
 
 ---
 
-## Deployment
+##  Deployment (Streamlit Cloud)
 
-The project is deployed using Streamlit Community Cloud.
+1. Push the repo to GitHub
+2. Visit: [https://streamlit.io/cloud](https://streamlit.io/cloud)
+3. Create new app
+4. Select repo
+5. Choose `app.py` as entry file
+6. Deploy 
 
-To deploy your own version:
-
-1. Push your code to a GitHub repository.
-2. Go to [https://streamlit.io/cloud](https://streamlit.io/cloud)
-3. Deploy a new app
-4. Select your repository
-5. Set the main file as `app.py`
-6. Deploy
-
-Streamlit Cloud automatically installs dependencies from `requirements.txt`.
+Streamlit Cloud automatically installs `requirements.txt`.
 
 ---
 
-## Fine-Tuning the T5 Model
+##  Fine-Tuning the T5 Model (Optional)
 
 1. Collect user feedback in `data/user_feedback.jsonl`
-2. Run the fine-tuning script:
+2. Train using:
 
-```
+```bash
 python finetune_t5.py
 ```
 
-3. The script trains on your collected feedback.
-4. Save the new model under:
+3. Save the trained model to:
 
 ```
 models/finetuned_t5/
 ```
 
-5. Update model path in `app.py`:
+4. Update model path inside `app.py`:
 
 ```python
 MODEL_NAME = "models/finetuned_t5"
 ```
+
+---
+
+##  Summary
+
+Smart Notes AI Assistant transforms static documents into an interactive question-answering experience.
+Ideal for students, professionals, and educators who want fast, accurate answers based on their own notes.
+
+---

@@ -4,6 +4,9 @@ import json
 from pathlib import Path
 from io import BytesIO
 
+import easyocr
+reader = easyocr.Reader(['en'])
+
 import numpy as np
 from rank_bm25 import BM25Okapi
 from PyPDF2 import PdfReader
@@ -156,13 +159,11 @@ def extract_text_from_pdf(file: BytesIO) -> str:
     return "\n".join(texts)
 
 def extract_text_from_image(file: BytesIO) -> str:
-    if RUNNING_IN_CLOUD:
-        st.warning("Image OCR is disabled on the cloud. Please upload PDFs or text files.")
-        return ""
     try:
         image = Image.open(file).convert("RGB")
-        text = pytesseract.image_to_string(image)
-        return text
+        img_np = np.array(image)
+        results = reader.readtext(img_np, detail=0)
+        return "\n".join(results)
     except Exception as e:
         st.warning(f"OCR failed: {e}")
         return ""

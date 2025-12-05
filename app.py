@@ -11,6 +11,7 @@ import numpy as np
 from rank_bm25 import BM25Okapi
 from PyPDF2 import PdfReader
 from PIL import Image
+import cv2
 import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
@@ -158,16 +159,30 @@ def extract_text_from_pdf(file: BytesIO) -> str:
         texts.append(page.extract_text() or "")
     return "\n".join(texts)
 
-def extract_text_from_image(file: BytesIO) -> str:
+
+def extract_text_from_image(file):
     try:
         image = Image.open(file).convert("RGB")
-        img_np = np.array(image)
-        results = reader.readtext(img_np, detail=0)
-        return "\n".join(results)
+        img = np.array(image)
+
+        # Convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        # Threshold to reduce noise
+        gray = cv2.adaptiveThreshold(
+            gray, 255,
+            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+            cv2.THRESH_BINARY,
+            31, 2
+        )
+
+        # OCR
+        text = pytesseract.image_to_string(gray)
+        return text.strip()
+
     except Exception as e:
         st.warning(f"OCR failed: {e}")
         return ""
-
 def extract_text_from_file(uploaded_file) -> str:
     if uploaded_file is None:
         return ""

@@ -4,21 +4,26 @@ import json
 from pathlib import Path
 from io import BytesIO
 
-import easyocr
-reader = easyocr.Reader(['en'], gpu=False)
-
 import numpy as np
 from rank_bm25 import BM25Okapi
 from PyPDF2 import PdfReader
 from PIL import Image
-import cv2
 
 import sys
 RUNNING_IN_CLOUD = "streamlit" in sys.modules
 
+# --- Optional OCR (EasyOCR) ---
+try:
+    import easyocr
+    OCR_AVAILABLE = True
+    reader = easyocr.Reader(['en'], gpu=False)
+except Exception as e:
+    OCR_AVAILABLE = False
+    OCR_ERROR = str(e)
+    reader = None
+
 import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-
 # ---------------- CONFIG ----------------
 
 DATA_DIR = Path("data")
@@ -160,6 +165,14 @@ def extract_text_from_pdf(file: BytesIO) -> str:
 
 def extract_text_from_image(file: BytesIO) -> str:
     """Extract text from an image file using EasyOCR."""
+    if not OCR_AVAILABLE:
+        st.warning(
+            "Image OCR is disabled on this deployment "
+            f"(EasyOCR error: {OCR_ERROR}). "
+            "You can still upload PDFs and text files."
+        )
+        return ""
+
     try:
         image = Image.open(file).convert("RGB")
         img_array = np.array(image)

@@ -261,7 +261,7 @@ def log_user_feedback(entry: dict):
 
 # ---------------- MAIN UI ----------------
 
-st.title("InsightQuery AI – Ask Anything From Your Files")
+st.title("Smart Notes AI Assistant")
 
 if st.session_state.user is None:
     st.info("Please login or sign up from the sidebar to use the app.")

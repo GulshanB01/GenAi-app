@@ -5,15 +5,14 @@ from pathlib import Path
 from io import BytesIO
 
 import easyocr
-reader = easyocr.Reader(['en'])
+
+reader = easyocr.Reader(['en'], gpu=False)
 
 import numpy as np
 from rank_bm25 import BM25Okapi
 from PyPDF2 import PdfReader
 from PIL import Image
 import cv2
-import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 import sys
 RUNNING_IN_CLOUD = "streamlit" in sys.modules
@@ -35,7 +34,7 @@ MODEL_NAME = "google/flan-t5-small"
 MAX_CONTEXT_CHARS = 2000
 
 # starting credits for each new user
-DEFAULT_CREDITS = 2
+DEFAULT_CREDITS = 10
 
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -159,30 +158,15 @@ def extract_text_from_pdf(file: BytesIO) -> str:
         texts.append(page.extract_text() or "")
     return "\n".join(texts)
 
-
 def extract_text_from_image(file):
-    try:
-        image = Image.open(file).convert("RGB")
-        img = np.array(image)
+    import numpy as np
+    from PIL import Image
+    img = Image.open(file).convert("RGB")
+    img_np = np.array(img)
 
-        # Convert to grayscale
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    result = reader.readtext(img_np, detail=0)
+    return "\n".join(result)
 
-        # Threshold to reduce noise
-        gray = cv2.adaptiveThreshold(
-            gray, 255,
-            cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-            cv2.THRESH_BINARY,
-            31, 2
-        )
-
-        # OCR
-        text = pytesseract.image_to_string(gray)
-        return text.strip()
-
-    except Exception as e:
-        st.warning(f"OCR failed: {e}")
-        return ""
 def extract_text_from_file(uploaded_file) -> str:
     if uploaded_file is None:
         return ""

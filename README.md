@@ -1,4 +1,4 @@
-#  Smart Notes AI Assistant
+#  Smart Notes GenAI Assistant
 
 Smart Notes AI Assistant is an intelligent document-based Q&A system that allows users to upload their notes (PDF or text files) and ask questions directly from them.
 The system performs text extraction, chunking, semantic retrieval, and answer generation using a T5 model.

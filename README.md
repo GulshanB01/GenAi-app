@@ -108,7 +108,7 @@ This can later be used to fine-tune the T5 model for better accuracy.
 * Python
 * HuggingFace Transformers
 * T5 (base or fine-tuned)
-* PyTorch
+* TensorFlow 
 
 ###  Document Processing
 

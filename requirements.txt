@@ -5,8 +5,3 @@ PyPDF2
 rank-bm25
 torch
 transformers
-easyocr==1.7.2
-opencv-python-headless
-scikit-image
-python-bidi
-shapely

@@ -7,17 +7,13 @@ from io import BytesIO
 import numpy as np
 from rank_bm25 import BM25Okapi
 from PyPDF2 import PdfReader
-from PIL import Image
 
 import sys
 RUNNING_IN_CLOUD = "streamlit" in sys.modules
 
-import easyocr
-reader = easyocr.Reader(['en'], gpu=False)
-
-
 import torch
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+
 # ---------------- CONFIG ----------------
 
 DATA_DIR = Path("data")
@@ -124,7 +120,7 @@ def login_signup_widget():
                 step=1,
                 key="manual_add_credits"
             )
-            if st.button("Add credits", key="btn_add_credits"):
+            if st.sidebar.button("Add credits", key="btn_add_credits"):
                 st.session_state.credits += int(add_amount)
                 update_user_credits()
                 st.success(f"Added {int(add_amount)} credits.")
@@ -157,29 +153,8 @@ def extract_text_from_pdf(file: BytesIO) -> str:
     return "\n".join(texts)
 
 
-def extract_text_from_image(file: BytesIO) -> str:
-    """Extract text from an uploaded image using EasyOCR."""
-    try:
-        # Load image
-        image = Image.open(file).convert("RGB")
-        img_array = np.array(image)
-
-        # OCR reading
-        result = reader.readtext(img_array, detail=0)
-
-        # If OCR detects nothing
-        if not result:
-            return "No readable text found in the image."
-
-        # Join detected lines
-        return "\n".join(result)
-
-    except Exception as e:
-        st.warning(f"OCR failed while processing image: {e}")
-        return ""
-
-
 def extract_text_from_file(uploaded_file) -> str:
+    """Handle only PDF / TXT / MD."""
     if uploaded_file is None:
         return ""
 
@@ -196,11 +171,10 @@ def extract_text_from_file(uploaded_file) -> str:
         return extract_text_from_pdf(file_obj)
     elif file_ext in ["txt", "md"]:
         return file_bytes.decode("utf-8", errors="ignore")
-    elif file_ext in ["png", "jpg", "jpeg"]:
-        return extract_text_from_image(file_obj)
     else:
-        st.warning("Unsupported file type. Use PDF/TXT/MD/PNG/JPG.")
+        st.warning("Unsupported file type. Use PDF/TXT/MD only.")
         return ""
+
 
 def simple_chunk_text(text: str, max_chars: int = 1000) -> list:
     text = text.replace("\r", " ")
@@ -285,12 +259,12 @@ if st.session_state.user is None:
     st.info("Please login or sign up from the sidebar to use the app.")
     st.stop()
 
-st.write("Upload your PDFs / text files / images and ask questions. Each answer uses 1 credit.")
+st.write("Upload your PDFs / text files and ask questions. Each answer uses 1 credit.")
 
 # Upload section
 uploaded_files = st.file_uploader(
-    "Upload notes (PDF / TXT / MD / PNG / JPG)",
-    type=["pdf", "txt", "md", "png", "jpg", "jpeg"],
+    "Upload notes (PDF / TXT / MD only)",
+    type=["pdf", "txt", "md"],
     accept_multiple_files=True
 )
 

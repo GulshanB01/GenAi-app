@@ -261,7 +261,7 @@ def log_user_feedback(entry: dict):
 
 # ---------------- MAIN UI ----------------
 
-st.title("🧠 AI Notes Q&A (Single T5 Model)")
+st.title("InsightQuery AI – Ask Anything From Your Files")
 
 if st.session_state.user is None:
     st.info("Please login or sign up from the sidebar to use the app.")

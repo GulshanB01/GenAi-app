@@ -1,0 +1,8 @@
+streamlit
+transformers
+torch
+rank-bm25
+PyPDF2
+Pillow
+pytesseract
+numpy
